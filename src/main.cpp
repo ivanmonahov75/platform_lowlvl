@@ -40,14 +40,18 @@ void setup() {
   
 
 }
+
+// variables 
 uint8_t speed = 15;
-uint8_t timer_mins = 5;
+uint32_t timer_mins = 5;
 bool on = 0;
 bool flag_on = 0;
 
 bool flag_up = 0;
 bool flag_down = 0;
 bool flag_timer = 0;
+
+uint32_t time_on_start = millis();
 
 void loop() {
   if (digitalRead(17) == 1) // safety measure time
@@ -65,6 +69,7 @@ void loop() {
 
         // actual action
         on = !on;
+
       }
     }
     if (digitalRead(BUTTON_ON) && flag_on)
@@ -138,10 +143,23 @@ void loop() {
   if (on)
   {
     lcd.print("ON ");
+    if (millis() - time_on_start < timer_mins * 60 * 1000)
+    {
+      // turn on
+      // set speed
+
+    }
+    else
+    {
+      // turn of
+      on = 0;
+    }
   }
   else
   {
     lcd.print("OFF");
+    time_on_start = millis();
+
   }
 
   // set speed to lcd
