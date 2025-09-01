@@ -2,15 +2,14 @@
 #include <LiquidCrystal_I2C.h>
 
 // defines 
-#define BUTTON_UP 142 // change back to 14
+#define BUTTON_UP 14 // change back to 14
 #define BUTTON_DOWN 15
-#define BUTTON_ON 16
-#define EMER_STOP 17
+#define BUTTON_ON 17
+#define EMER_STOP 4
 
-#define BUTTON_TIMER 14 // change to another
+#define BUTTON_TIMER 16 // change to another
 
-// functions 
-bool chech_button(const uint8_t BUTTON_NUM, bool* flag);
+#define MOTOR_CONTROL 3
 
 // objects
 LiquidCrystal_I2C lcd(0x27,20,4);
@@ -33,18 +32,21 @@ void setup() {
 
   pinMode(BUTTON_DOWN, INPUT_PULLUP);
   pinMode(BUTTON_ON, INPUT_PULLUP);
-  pinMode(BUTTON_ON, INPUT_PULLUP);
+  pinMode(BUTTON_UP, INPUT_PULLUP);
   pinMode(EMER_STOP, INPUT_PULLUP);
   pinMode(BUTTON_TIMER, INPUT_PULLUP);
-
+  pinMode(MOTOR_CONTROL, OUTPUT);
   
+  // just to be sure
+  digitalWrite(MOTOR_CONTROL, 0);
+
 
 }
 
 // variables 
-uint8_t speed = 15;
+uint8_t speed = 1;
 uint32_t timer_mins = 5;
-bool on = 0;
+bool on = false;
 bool flag_on = 0;
 
 bool flag_up = 0;
@@ -54,7 +56,7 @@ bool flag_timer = 0;
 uint32_t time_on_start = millis();
 
 void loop() {
-  if (digitalRead(17) == 1) // safety measure time
+  if (digitalRead(EMER_STOP) == 1) // safety measure time
   {
     // do our shit
     // note: all buttons are reversed
@@ -132,11 +134,11 @@ void loop() {
   {
 
     // turn off
+    digitalWrite(MOTOR_CONTROL, 0);
 
 
 
   }
-
 
   // set state lcd
   lcd.setCursor(5, 1);
@@ -147,11 +149,13 @@ void loop() {
     {
       // turn on
       // set speed
+      analogWrite(MOTOR_CONTROL, round(map(speed, 2, 30, 66, 107)));
 
     }
     else
     {
       // turn of
+      digitalWrite(MOTOR_CONTROL, 0);
       on = 0;
     }
   }
@@ -159,17 +163,17 @@ void loop() {
   {
     lcd.print("OFF");
     time_on_start = millis();
+    digitalWrite(MOTOR_CONTROL, 0);
 
   }
-
   // set speed to lcd
   if (speed > 30)
   {
     speed = 30;
   }
-  if (speed < 1)
+  if (speed < 2)
   {
-    speed = 1;
+    speed = 2;
   }
 
   lcd.setCursor(14, 1);
@@ -192,8 +196,6 @@ void loop() {
   }
   lcd.print(timer_mins);
 
-  // global delay
-  delay(10);
 }
 
 // bool chech_button(const uint8_t BUTTON_NUM, bool* flag){  
